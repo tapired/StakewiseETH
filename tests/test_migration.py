@@ -17,7 +17,7 @@ def test_migration(
     user,
     RELATIVE_APPROX,
 ):
-    # Deposit to the vault and harvest
+    # Deposit to the vault and harves
     token.approve(vault.address, amount, {"from": user})
     vault.deposit(amount, {"from": user})
     chain.sleep(1)

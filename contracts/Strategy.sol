@@ -221,7 +221,7 @@ contract Strategy is BaseStrategy {
 
     function _withdrawSome(uint256 _amount) internal {
         uint256 debt = vault.strategies(address(this)).totalDebt;
-        _amount = (_amount.mul(balanceOfSETH2()).mul(1e18)).div(debt);
+        _amount = _amount.mul(balanceOfSETH2()).div(debt);
         _amount = Math.min(_amount, balanceOfSETH2());
         if (_amount > 0) {
             IUniV3(uniswapv3).exactInput(

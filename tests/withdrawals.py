@@ -3,7 +3,7 @@ from brownie import Contract
 from utils import checks
 import pytest
 
-def test_profitable_harvest_fullwithdrawal(
+def test_losewithdrawal(
     chain,
     accounts,
     token,
@@ -37,10 +37,11 @@ def test_profitable_harvest_fullwithdrawal(
 
  checks.check_harvest_profitable(tx) # if we made profit
 
- checks.check_vault_empty(vault)
- checks.check_strategy_empty(strategy)
- vault.withdraw(vault.balanceOf(user),user,1,{"from":user})
- assert token.balanceOf(user) > amount
+ vault.withdraw(vault.balanceOf(user),user,10_000,{"from":user})
+
+ loss = amount - token.balanceOf(user)
+ assert token.balanceOf(user) < amount
+ assert token.balanceOf(user) + loss ==  amount 
 
 def test_fullwithdrawal_withoutharvest(
      chain,
@@ -73,4 +74,4 @@ def test_fullwithdrawal_withoutharvest(
   print(token.balanceOf(user))
   checks.check_vault_empty(vault)
   checks.check_strategy_empty(strategy)
-  assert loss + token.balanceOf(user) == user_balance_before 
+  assert loss + token.balanceOf(user) == user_balance_before

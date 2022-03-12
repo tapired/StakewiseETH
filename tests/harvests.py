@@ -27,11 +27,7 @@ def test_profitable_harvest(
     token.approve(vault.address, amount, {"from": user})
     vault.deposit(amount, {"from": user})
     assert token.balanceOf(vault.address) == amount
-#reth2totalsupply+10eth#
-    # Harvest 1: Send funds through the strategy
-    # strategy.switchDex(2,uniswap.address,{"from":strategist})
-    # strategy.setPathTarget(0,2,{"from":strategist})
-    # strategy.setPathTarget(1,1,{"from":strategist})
+
     strategy.harvest()
     chain.sleep(1)
     chain.mine(1)

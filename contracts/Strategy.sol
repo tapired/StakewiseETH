@@ -112,11 +112,11 @@ contract Strategy is BaseStrategy {
         uniStableFeeAlternate = _uniStableFeeAlternate;
     }
 
-    function setMaxDepositWithoutQueue(uint256 _ethers)
+    function setMaxDepositWithoutQueue(uint256 _ethersInWei)
         external
         onlyAuthorized
     {
-        maxDepositWithoutQueue = _ethers * 1e18;
+        maxDepositWithoutQueue = _ethersInWei;
     }
 
     function setSwapTosETH2(bool _changeSwap) external onlyAuthorized {

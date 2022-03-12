@@ -41,7 +41,7 @@ def test_losewithdrawal(
 
  loss = amount - token.balanceOf(user)
  assert token.balanceOf(user) < amount
- assert token.balanceOf(user) + loss ==  amount 
+ assert token.balanceOf(user) + loss ==  amount
 
 def test_fullwithdrawal_withoutharvest(
      chain,

@@ -167,9 +167,10 @@ contract Strategy is BaseStrategy {
         )
     {
         uint256 debt = vault.strategies(address(this)).totalDebt;
+        uint256 _lossFromPrevious;
 
         if (debt > estimatedTotalAssets()) {
-            _loss = debt.sub(estimatedTotalAssets());
+            _lossFromPrevious = debt.sub(estimatedTotalAssets());
         }
 
         if (_debtOutstanding > 0) {
@@ -182,12 +183,12 @@ contract Strategy is BaseStrategy {
         uint256 _wantAfter = want.balanceOf(address(this)); // 100
         _profit = _wantAfter.sub(_wantBefore);
         //net off profit and loss
-        if (_profit >= _loss) {
-            _profit = _profit - _loss; // when we withdraw we might have lose so make sure everything is clean
+        if (_profit >= _loss + _lossFromPrevious) {
+            _profit = _profit - (_loss + _lossFromPrevious); // when we withdraw we might have lose so make sure everything is clean
             _loss = 0;
         } else {
             _profit = 0;
-            _loss = _loss - _profit;
+            _loss = (_loss + _lossFromPrevious) - _profit;
         }
     }
 

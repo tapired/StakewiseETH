@@ -36,7 +36,7 @@ def test_losewithdrawal(
  tx = strategy.harvest()   # harvest 1 time to get some profit
 
  checks.check_harvest_profitable(tx) # if we made profit
-
+# maybe wait for 6 hours before withdraw?
  vault.withdraw(vault.balanceOf(user),user,10_000,{"from":user})
 
  loss = amount - token.balanceOf(user)

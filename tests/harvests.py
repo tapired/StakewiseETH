@@ -35,13 +35,6 @@ def test_profitable_harvest(
     # assert pytest.approx(strategy.estimatedTotalAssets(), rel=RELATIVE_APPROX) == amount
     # strategy.setSwapTosETH2(False,{"from":gov}) # instead of swapping we stake and mint 1:1
 
-    reth2.updateTotalRewards(1700000000000000000000,{"from":oracle})
-    chain.sleep(86400 * 5)
-    chain.mine(1)
-    print("strategy has reth", reth2.balanceOf(strategy))
-    strategy.harvest()
-    print("strategy has", strategy.estimatedTotalAssets())
-
     reth2.updateTotalRewards(1800000000000000000000,{"from":oracle})
     chain.sleep(86400 * 5)
     chain.mine(1)
@@ -71,6 +64,13 @@ def test_profitable_harvest(
     print("strategy has", strategy.estimatedTotalAssets())
 
     reth2.updateTotalRewards(2200000000000000000000,{"from":oracle})
+    chain.sleep(86400 * 5)
+    chain.mine(1)
+    print("strategy has reth", reth2.balanceOf(strategy))
+    strategy.harvest()
+    print("strategy has", strategy.estimatedTotalAssets())
+
+    reth2.updateTotalRewards(2300000000000000000000,{"from":oracle})
     chain.sleep(86400 * 5)
     chain.mine(1)
     print("strategy has reth", reth2.balanceOf(strategy))

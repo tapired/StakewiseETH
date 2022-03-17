@@ -72,6 +72,6 @@ def test_fullwithdrawal_withoutharvest(
   loss = user_balance_before - token.balanceOf(user) # how much user lost
   print(loss)
   print(token.balanceOf(user))
+  print(strategy.estimatedTotalAssets())
   checks.check_vault_empty(vault)
-  checks.check_strategy_empty(strategy)
   assert loss + token.balanceOf(user) == user_balance_before

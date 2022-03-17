@@ -7,8 +7,16 @@ import "@openzeppelin/contracts/math/Math.sol";
 import "../interfaces/Stakewise.sol";
 
 // These are the core Yearn libraries
-import {BaseStrategy, StrategyParams} from "@yearnvaults/contracts/BaseStrategy.sol";
-import {SafeERC20, SafeMath, IERC20, Address} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import {
+    BaseStrategy,
+    StrategyParams
+} from "@yearnvaults/contracts/BaseStrategy.sol";
+import {
+    SafeERC20,
+    SafeMath,
+    IERC20,
+    Address
+} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 interface IUniV3 {
     struct ExactInputParams {
@@ -85,9 +93,12 @@ contract Strategy is BaseStrategy {
         address(0xE592427A0AEce92De3Edee1F18E0157C05861564);
     address public constant StakewisePool =
         address(0xC874b064f465bdD6411D45734b56fac750Cda29A);
-    uint24 public uniStableFee;
-    uint24 public uniStableFeeAlternate;
+    uint64 public uniStableFee;
+    uint64 public uniStableFeeAlternate;
+    uint64 public slippageProtectionOut; // = 50; //out of 10000. 50 = 0.5%
     uint256 public maxDepositWithoutQueue;
+    uint256 public maxSingleTrade;
+    uint256 public constant DENOMINATOR = 10_000;
     bool public swapTosETH2;
 
     constructor(address _vault) public BaseStrategy(_vault) {
@@ -98,6 +109,8 @@ contract Strategy is BaseStrategy {
         uniStableFee = 3000;
         uniStableFeeAlternate = 500;
         maxDepositWithoutQueue = 32 ether; // stakewise has a maxDeposit limit , if the deposited amount is bigger than this it will go on queue
+        maxSingleTrade = 1_000 * 1e18;
+        slippageProtectionOut = 50;
         swapTosETH2 = true; // default to swap weth to seth2 rather than mint
     }
 
@@ -112,11 +125,15 @@ contract Strategy is BaseStrategy {
         uniStableFeeAlternate = _uniStableFeeAlternate;
     }
 
-    function setMaxDepositWithoutQueue(uint256 _ethersInWei)
+    function setMaxDepositWithoutQueue(uint256 _wei) external onlyAuthorized {
+        maxDepositWithoutQueue = _wei;
+    }
+
+    function setMaxSingleTrade(uint256 _maxSingleTrade)
         external
         onlyAuthorized
     {
-        maxDepositWithoutQueue = _ethersInWei;
+        maxSingleTrade = _maxSingleTrade;
     }
 
     function setSwapTosETH2(bool _changeSwap) external onlyAuthorized {
@@ -149,6 +166,12 @@ contract Strategy is BaseStrategy {
             uint256 _debtPayment
         )
     {
+        uint256 debt = vault.strategies(address(this)).totalDebt;
+
+        if (debt > estimatedTotalAssets()) {
+            _loss = debt.sub(estimatedTotalAssets());
+        }
+
         if (_debtOutstanding > 0) {
             uint256 _amountFreed = 0;
             (_amountFreed, _loss) = liquidatePosition(_debtOutstanding);
@@ -172,6 +195,7 @@ contract Strategy is BaseStrategy {
         uint256 _wantBalance = balanceOfWant(); // weth
         if (_wantBalance > 0) {
             if (swapTosETH2) {
+                _wantBalance = Math.min(_wantBalance, maxSingleTrade);
                 IUniV3(uniswapv3).exactInput(
                     IUniV3.ExactInputParams(
                         abi.encodePacked(
@@ -223,6 +247,7 @@ contract Strategy is BaseStrategy {
         uint256 debt = vault.strategies(address(this)).totalDebt;
         _amount = _amount.mul(balanceOfSETH2()).div(debt);
         _amount = Math.min(_amount, balanceOfSETH2());
+        /* uint256 slippageAllowance = _amount.mul(DENOMINATOR.sub(slippageProtectionOut)).div(DENOMINATOR); */
         if (_amount > 0) {
             IUniV3(uniswapv3).exactInput(
                 IUniV3.ExactInputParams(

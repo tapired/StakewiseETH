@@ -207,7 +207,7 @@ contract Strategy is BaseStrategy {
                         address(this),
                         block.timestamp,
                         _wantBalance,
-                        0
+                        _wantBalance
                     )
                 );
             } else {
@@ -246,7 +246,7 @@ contract Strategy is BaseStrategy {
 
     function _withdrawSome(uint256 _amount) internal {
         uint256 debt = vault.strategies(address(this)).totalDebt;
-        _amount = _amount.mul(balanceOfSETH2()).div(debt);
+        _amount = _amount.mul(balanceOfSETH2()).div(debt); // 10
         _amount = Math.min(_amount, balanceOfSETH2());
         /* uint256 slippageAllowance = _amount.mul(DENOMINATOR.sub(slippageProtectionOut)).div(DENOMINATOR); */
         if (_amount > 0) {

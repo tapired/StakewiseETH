@@ -246,7 +246,7 @@ contract Strategy is BaseStrategy {
 
     function _withdrawSome(uint256 _amount) internal {
         uint256 debt = vault.strategies(address(this)).totalDebt;
-        _amount = _amount.mul(balanceOfSETH2()).div(debt); // 10
+        _amount = _amount.mul(balanceOfSETH2()).div(debt); // withdraw proportion to debt
         _amount = Math.min(_amount, balanceOfSETH2());
         /* uint256 slippageAllowance = _amount.mul(DENOMINATOR.sub(slippageProtectionOut)).div(DENOMINATOR); */
         if (_amount > 0) {
@@ -310,6 +310,11 @@ contract Strategy is BaseStrategy {
         protected[0] = rETH2;
         protected[1] = sETH2;
         return protected;
+    }
+
+    function sweepETH() public onlyGovernance {
+        (bool success, ) = governance().call{value: address(this).balance}("");
+        require(success, "!FailedETHSweep");
     }
 
     function ethToWant(uint256 _amtInWei)

@@ -27,13 +27,13 @@ def test_profitable_harvest(
     token.approve(vault.address, amount, {"from": user})
     vault.deposit(amount, {"from": user})
     assert token.balanceOf(vault.address) == amount
+    strategy.setSwapTosETH2(False,{"from":gov}) # instead of swapping we stake and mint 1:1
 
     strategy.harvest()
     chain.sleep(1)
     chain.mine(1)
     print("strategy has", strategy.estimatedTotalAssets())
     # assert pytest.approx(strategy.estimatedTotalAssets(), rel=RELATIVE_APPROX) == amount
-    strategy.setSwapTosETH2(False,{"from":gov}) # instead of swapping we stake and mint 1:1
 
     reth2.updateTotalRewards(1800000000000000000000,{"from":oracle})
     chain.sleep(86400 * 5)
